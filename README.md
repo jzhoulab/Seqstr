@@ -1,6 +1,11 @@
 # SeqStr Documentation
 
-SeqStr translates sequence string input into actual sequences for downstream analysis. It accepts the following patterns/formats of string input:
+SeqStr translates sequence string input into actual sequences for downstream analysis. Some of the major capabilities include:
+  1. Extracting sequences from genomes using selene_sdk. By providing a genome ID and coordinates, the code can extract the corresponding DNA sequence from the genome. For example, [hg38]chr1:100-200 + would extract bases 100 through 200 from chromosome 1 of the hg38 human genome assembly.
+  2. Handling mutation strings using `@`. The code can find the position specified after @ and substitute the reference base at that position with the provided alternate base. For example, `[hg38]chr1:100-200 +, @120 A T` would extract that chr1:100-200 sequence but replace base 120 with A, giving AACTGT. 
+  3. Concatenating and parsing comma-separated input sections. SeqStr splits on `;` and `,` to parse multiple inputs together. For example, `[hg38]chr1:100-200 +, @120 A T; ACTGN` would extract and mutate the first sequence, then concatenate ACTGN, resulting in AACTGTN.
+
+It accepts the following patterns/formats of string input:
 
 - [reference_genome]chromosome:coordinate-coordinate strand
 
