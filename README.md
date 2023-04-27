@@ -29,9 +29,9 @@ It accepts the following patterns/formats of string input for single sequence (s
 
 - [reference_genome]chromosome:coordinate-coordinate strand,@chromosome coordinate reference_alleles alternative_alleles 
 
-  Example: `[hg38]chr7:5530575-5530625 -,\n@chr7 5530575 C T,\n@chr7 5530576 GC A`
+  Example: `[hg38]chr7:5530575-5530625 -,@chr7 5530575 C T,@chr7 5530576 GC A`
 
-    - variant format: separate the base sequence and variants specification via `,`, line break is optional
+    - variant format: separate the base sequence and variants specification via `,`
     - variants specification starts with `@`chromosome, then at particular coordinate, change from reference_alleles to alternative_alleles
  
 On top of the patterns/formats of string input for single sequence (single_SeqStr), multiple sequences takes the following form of concatenation of single_SeqStr
