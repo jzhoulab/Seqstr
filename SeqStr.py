@@ -2,6 +2,7 @@ import selene_sdk
 import re
 import os
 PROJECT_DIR = os.environ['PROJECT_PATH']
+
 def reverse_seq(seq):
     rev_seq = ''
     dct =  {'A': 'T', 'C': 'G', 'G': 'C', 'N': 'N', 'T': 'A', 'a': 'T', 'c': 'G', 'g': 'C', 'n': 'N', 't': 'A'}
@@ -17,16 +18,14 @@ def toSeq(text):
     if ':' in text:#chr:start-end strand
         try:
             geno = text[re.search('\[', text).start()+1:re.search('\]', text).start()]    
-            sub = text[re.search('\]', text).start()+1:].split(':')
         except:
             geno = 'hg38'
-            sub = text.split(':')
         #define genome input path using dict map
         genome = selene_sdk.sequences.Genome(
                                 input_path=PROJECT_DIR+'/Homo_sapiens.GRCh38.dna.primary_assembly.fa',
                                 blacklist_regions= 'hg38'
                             )
-        
+        sub = text[re.search('\]', text).start()+1:].split(':')
         chr = sub[0]
         position = sub[1].split(' ')[0].replace(' ', '')
         start = int(position.split('-')[0])
@@ -45,7 +44,6 @@ def parser(text):
     #, for continuation 
     #@chr mutpos ref alt
     #\n for multiple sequences 
-    #<> for sequence name
     outputs = []
     sec0 = filter(bool, text.splitlines())
     for ix, sub0 in enumerate(sec0):
@@ -63,13 +61,34 @@ def parser(text):
             if ',' in sub1:
                 sec2 = sub1.split(',')
                 baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = toSeq(sec2[0])#base seq
+                variation = []
                 for sub2 in sec2:
-                    if '@' in sub2:
+                    if '@' in sub2:#check overlap then chop by affected region                        
                         sec3 = sub2.split(' ')
-                        mutpos = int(sec3[1])
+                        mutpos = int(sec3[1])-baseSeqStart
                         ref = sec3[2].upper()
                         alt = sec3[3].upper()
-                        baseSeq = baseSeq[:(mutpos-baseSeqStart)] + alt + baseSeq[(mutpos-baseSeqStart+len(ref)):]
+                        variation.append((mutpos,mutpos+len(ref),ref,alt))    
+                if len(variation) > 0:
+                    sorted_variation = sorted(variation, key=lambda x: x[0])
+                    for ix,item in enumerate(sorted_variation):
+                        if ix != 0:
+                            if item[0] < sorted_variation[ix-1][1]:
+                                print("overlapping variation")
+                                return None
+                    varied_seq = ''
+                    for ix,item in enumerate(sorted_variation):
+                        if ix == 0:
+                            varied_seq += baseSeq[:item[0]]
+                            varied_seq += item[3]
+                        elif ix == len(sorted_variation)-1:
+                            varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                            varied_seq += item[3]
+                            varied_seq += baseSeq[item[1]:]
+                        else:
+                            varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                            varied_seq += item[3]
+                    baseSeq = varied_seq#copy to baseSeq
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
@@ -80,4 +99,3 @@ def parser(text):
                 output += baseSeq
             outputs.append((SeqName, output)) 
     return outputs#tuple of name and actual seq
-
