@@ -77,17 +77,22 @@ def parser(text):
                                 print("overlapping variation")
                                 return None
                     varied_seq = ''
-                    for ix,item in enumerate(sorted_variation):
-                        if ix == 0:
-                            varied_seq += baseSeq[:item[0]]
-                            varied_seq += item[3]
-                        elif ix == len(sorted_variation)-1:
-                            varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
-                            varied_seq += item[3]
-                            varied_seq += baseSeq[item[1]:]
-                        else:
-                            varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
-                            varied_seq += item[3]
+                    if len(sorted_variation) == 1:
+                        varied_seq += baseSeq[:item[0]]
+                        varied_seq += item[3]
+                        varied_seq += baseSeq[item[1]:]
+                    else:  
+                        for ix,item in enumerate(sorted_variation):
+                            if ix == 0:
+                                varied_seq += baseSeq[:item[0]]
+                                varied_seq += item[3]
+                            elif ix == len(sorted_variation)-1:
+                                varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                                varied_seq += item[3]
+                                varied_seq += baseSeq[item[1]:]
+                            else:
+                                varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                                varied_seq += item[3]
                     baseSeq = varied_seq#copy to baseSeq
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
