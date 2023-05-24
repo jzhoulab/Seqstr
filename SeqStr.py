@@ -64,7 +64,7 @@ def parser(text):
                 variation = []
                 for sub2 in sec2:
                     if '@' in sub2:#check overlap then chop by affected region                        
-                        sec3 = sub2.split(' ')
+                        sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
                         mutpos = int(sec3[1])-baseSeqStart
                         ref = sec3[2].upper()
                         alt = sec3[3].upper()
