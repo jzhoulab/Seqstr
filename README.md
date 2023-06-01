@@ -2,7 +2,7 @@
 
 SeqStr is a tool for translating string input into actual sequences. It provides a simple, consolidated way to parse many types of sequence string inputs and convert them into DNA sequence data that can be used for downstream bioinformatics analysis. SeqStr standardizes various patterns of inputs and accepts genome coordinates, mutation and raw sequence nucleotides. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. SeqStr can also render multiple sequences outputs for downstream comparisons.  
 
-- genomic interval
+1. genomic interval
 
 SeqStr can extract the corresponding genomic sequences by simply providing a genome ID, genomic interval and strand. For example, `[hg38]chr7:5530575-5530625 -` would extract reverse strand of bases 5530575 through 5530625 from chromosome 7 of the hg38 human genome assembly.
   - [reference_genome]chromosome:coordinate-coordinate strand
@@ -15,7 +15,7 @@ SeqStr can extract the corresponding genomic sequences by simply providing a gen
       - strand only takes `+` and `-`
 
 
-- multiple subsequences
+2. multiple subsequences
 
 SeqStr can compose multiple subsequences, connected by `;`. Each subsequence can be either a genomic interval (For example, `[hg38]chr7:5530575-5530625 -`) or a raw sequence (For example, `TTAAccggGGNaa`). Subsequence of genomic interval can be modified by a mutation specified with the syntax `@chromosome coordinate reference_alleles alternative_alleles`
 
@@ -28,7 +28,7 @@ SeqStr can compose multiple subsequences, connected by `;`. Each subsequence can
       - variant format: separate the base sequence and variants specification via `,`
       - variants specification starts with `@`chromosome, then at particular coordinate, change from reference_alleles to alternative_alleles
 
-- multiple sequences
+3. multiple sequences
 
 SeqStr supports multiple sequences separated by `\n` or line breaks and labeling via `<>` embedding the names assigned to each sequence. For example, `<s1>[hg38]chr7:5480600-5580600 -\n<s2>[hg38]chr7:44746680-44846680 +` would be parsed into an array of sequences, with `s1` and `s2` as their names.
 
