@@ -2,45 +2,42 @@
 
 SeqStr is a tool for translating string input into actual sequences. It provides a simple, consolidated way to parse many types of sequence string inputs and convert them into DNA sequence data that can be used for downstream bioinformatics analysis. SeqStr standardizes various patterns of inputs and accepts genome coordinates, mutation and raw sequence nucleotides. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. SeqStr can also render multiple sequences outputs for downstream comparisons.  
 
-Some of the major capabilities include:
-  1. Extracting sequences from genomes. By providing a genome ID and coordinates, the code can extract the corresponding DNA sequence from the genome. For example, [hg38]chr1:100-200 + would extract bases 100 through 200 from chromosome 1 of the hg38 human genome assembly.
-  2. Handling mutation strings using `@`. The code can find the position specified after @ and substitute the reference base at that position with the provided alternate base. For example, `[hg38]chr1:100-200 +, @120 A T` would extract that chr1:100-200 sequence but replace base 120 with A, giving AACTGT. 
-  3. Concatenating and parsing comma-separated input sections. SeqStr splits on `;` and `,` to parse multiple inputs together. For example, `[hg38]chr1:100-200 +, @120 A T; ACTGN` would extract and mutate the first sequence, then concatenate ACTGN, resulting in AACTGTN.
-  4. Supporting multiple sequences separated by `\n` or line breaks and labeling via `<>` embedding the names assigned to each sequence. For example, `<s1>[hg38]chr7:5480600-5580600 -\n<s2>[hg38]chr7:44746680-44846680 +` would be parsed into an array of sequences, with `s1` and `s2` as their labels.
+- genomic interval
 
-It accepts the following patterns/formats of string input for single sequence (single_SeqStr):
+SeqStr can extract the corresponding genomic sequences by simply providing a genome ID, genomic interval and strand. For example, `[hg38]chr7:5530575-5530625 -` would extract reverse strand of bases 5530575 through 5530625 from chromosome 7 of the hg38 human genome assembly.
+  - [reference_genome]chromosome:coordinate-coordinate strand
 
-- [reference_genome]chromosome:coordinate-coordinate strand
+    Example: `[hg38]chr7:5530575-5530625 -`
 
-  Example: `[hg38]chr7:5530575-5530625 -`
+      - SeqStr parses `[]` as reference genome, need to load specific assembly files if not default hg38
+      - chromosome follows the namespace from the provided assembly files
+      - starting and ending coordinates are connected via `-`
+      - strand only takes `+` and `-`
 
-    - SeqStr parses `[]` as reference genome, need to load specific assembly files if not default hg38
-    - chromosome follows the namespace from the provided assembly files
-    - starting and ending coordinates are connected via `-`
-    - strand only takes `+` and `-`
 
-- [reference_genome]chromosome:coordinate-coordinate strand;raw sequence;
+- multiple subsequences
 
-  Example: `[hg38]chr7:5530590-5530610 -;TTAAccggGGNaa;[hg38]chrX:1000000-1000017 +`
+SeqStr can compose multiple subsequences, connected by `;`. Each subsequence can be either a genomic interval (For example, `[hg38]chr7:5530575-5530625 -`) or a raw sequence (For example, `TTAAccggGGNaa`). Subsequence of genomic interval can be modified by a mutation specified with the syntax `@chromosome coordinate reference_alleles alternative_alleles`
 
-    - consistent with the above specifications
-    - `;` is used to separate multiple sections of sequences. The final outcome consists of all sections and follows the order of input string
-    - raw sequence strings are also allowed and remain as they were in the entire output sequence
+  - [reference_genome]chromosome:coordinate-coordinate strand,@chromosome coordinate reference_alleles alternative_alleles;raw sequence; 
 
-- [reference_genome]chromosome:coordinate-coordinate strand,@chromosome coordinate reference_alleles alternative_alleles 
+    Example: `[hg38]chr7:5530575-5530625 -,@chr7 5530575 C T,@chr7 5530576 GC A;TTAAccggGGNaa;[hg38]chrX:1000000-1000017 +;TTAA;`
+    
+      - `;` is used to separate multiple sections of sequences. The final outcome consists of all sections and follows the order of input string
+      - raw sequence strings are also allowed and remain as they were in the entire output sequence
+      - variant format: separate the base sequence and variants specification via `,`
+      - variants specification starts with `@`chromosome, then at particular coordinate, change from reference_alleles to alternative_alleles
 
-  Example: `[hg38]chr7:5530575-5530625 -,@chr7 5530575 C T,@chr7 5530576 GC A`
+- multiple sequences
 
-    - variant format: separate the base sequence and variants specification via `,`
-    - variants specification starts with `@`chromosome, then at particular coordinate, change from reference_alleles to alternative_alleles
+SeqStr supports multiple sequences separated by `\n` or line breaks and labeling via `<>` embedding the names assigned to each sequence. For example, `<s1>[hg38]chr7:5480600-5580600 -\n<s2>[hg38]chr7:44746680-44846680 +` would be parsed into an array of sequences, with `s1` and `s2` as their names.
+
  
-On top of the patterns/formats of string input for single sequence (single_SeqStr), multiple sequences takes the following form of concatenation of single_SeqStr
- 
-- <sequence_label>single_SeqStr\n<sequence_label>single_SeqStr
+  - <sequence_name>sequence\n<sequence_name>sequence
 
-  Example: `<s1>[hg38]chr7:5480600-5580600 -\n[hg38]chr7:44746680-44846680 +`
+    Example: `<s1>[hg38]chr7:5480600-5580600 -\n[hg38]chr7:44746680-44846680 +`
 
-    - SeqStr parses `\n` or line break as delimiter of string input for each single sequence
-    - String enclosed by `<>` is treated as the label for the single sequence. If not provided, SeqStr assigns `Sequence i` to the label as default where `i` refers to the index, i.e. ith sequence among all
+      - SeqStr parses `\n` or line break as delimiter of string input for each single sequence
+      - String enclosed by `<>` is treated as the label for the single sequence. If not provided, SeqStr assigns `Sequence i` to the label as default where `i` refers to the index, i.e. ith sequence among all
     
     
