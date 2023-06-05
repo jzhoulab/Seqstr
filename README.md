@@ -38,7 +38,13 @@ SeqStr supports specifying multiple sequences separated by `\n` or line breaks a
 <s2>[hg38]chr7:44746680-44846680 +
 ``` 
 would be parsed into an array of sequences, with `s1` and `s2` as their names.
-- Seqstr interprets `\n` or line break as separator for multiple sequences
+- SeqStr interprets `\n` or line break as separator for multiple sequences
 - String enclosed by `<>` at the beginning of a sequence is used as the name for the single sequence. If not provided, SeqStr assigns `i` to the name by default where `i` refers to the numerical order of the sequence starting from 0.
     
 ### Output format
+
+SeqStr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
+
+```
+([('s1', 'TTGCACTCCAGCCTGGACAA'), ('s2', 'CCTGGGATGCTTGGCGTGGC')], '')
+```
