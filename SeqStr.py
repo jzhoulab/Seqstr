@@ -14,8 +14,8 @@ def reverse_seq(seq):
     return rev_seq[::-1]
 def toSeq(text):
     text =  text.strip()
-
-    if ':' in text:#chr:start-end strand
+    #chr:start-end strand
+    if ':' in text:
         try:
             geno = text[re.search('\[', text).start()+1:re.search('\]', text).start()]    
         except:
@@ -54,16 +54,20 @@ def parser(text):
             SeqName = "Sequence " + str(ix)
             sub0text = sub0
         output = ''
-        sub0text = re.sub(' +', ' ', sub0text)#remove extra spaces
+        #remove extra spaces
+        sub0text = re.sub(' +', ' ', sub0text)
         sec1 = sub0text.split(';')
         for sub1 in sec1:
-            sub1 = re.sub(' +', ' ', sub1)#remove extra spaces
+            #remove extra spaces
+            sub1 = re.sub(' +', ' ', sub1)
             if ',' in sub1:
                 sec2 = sub1.split(',')
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = toSeq(sec2[0])#base seq
+                #base seq
+                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = toSeq(sec2[0])
                 variation = []
                 for sub2 in sec2:
-                    if '@' in sub2:#check overlap then chop by affected region                        
+                    #check overlap then chop by affected region
+                    if '@' in sub2:
                         sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
                         mutpos = int(sec3[1])-baseSeqStart
                         ref = sec3[2].upper()
@@ -93,7 +97,8 @@ def parser(text):
                             else:
                                 varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
                                 varied_seq += item[3]
-                    baseSeq = varied_seq#copy to baseSeq
+                    #copy to baseSeq
+                    baseSeq = varied_seq
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
@@ -103,4 +108,5 @@ def parser(text):
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
             outputs.append((SeqName, output)) 
-    return outputs#tuple of name and actual seq
+    #tuple of name and actual seq
+    return outputs
