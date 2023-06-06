@@ -43,8 +43,9 @@ would be parsed into an array of sequences, with `s1` and `s2` as their names.
     
 ### Output format
 
-Seqstr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
+In the python implementation, Seqstr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
 
 ```
 ([('s1', 'TTGCACTCCAGCCTGGACAA'), ('s2', 'CCTGGGATGCTTGGCGTGGC')], '')
 ```
+Generally, we expect the Seqstr output to be a lists that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
