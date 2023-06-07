@@ -4,7 +4,8 @@ Seqstr (pronounced as seq-string) is a lightweight tool to compiles string input
 
 Seqstr is also a format specification, which can be implemented in different languages. We will soon provide a test suite for verifying an implementation.
 
-### Basic usage
+## Seqstr format
+### Genomic interval
 
 Use `[reference_genome]chr:start-end strand` to specify an genomic interval. For example, `[hg38]chr7:5530575-5530625 -` would extract cooridnate 5530575 through 5530625 from chromosome 7 of the hg38 reference genome, and take reverse complement of the sequence. 
 
@@ -12,6 +13,8 @@ Use `[reference_genome]chr:start-end strand` to specify an genomic interval. For
 - chromosome name should be one of the chromosome names from the specified reference genome (UCSC convention), followed by `:`
 - start and end coordinates are 0-based, connected via `-`, inclusive for the start coordinate and exclusive for the end coordinate
 - strand only takes `+` and `-`, default is `+`. strand is separated from end coordinate by a space
+
+### Composing and modifying sequences
 
 For more flexibly specifying a sequence that is different from the reference genome sequence, Seqstr can take input like `[hg38]chr7:5530575-5530625 -, @chr7 5530575 C T, @chr7 5530576 GC A;TTAAccggGGNaa;[hg38]chrX:1000000-1000017 +;TTAA;`, which is explained below:
 
@@ -41,11 +44,14 @@ would be parsed into an array of sequences, with `s1` and `s2` as their names.
 - Seqstr interprets `\n` or line break as separator for multiple sequences
 - String enclosed by `<>` at the beginning of a sequence is used as the name for the single sequence. If not provided, Seqstr assigns `i` to the name by default where `i` refers to the numerical order of the sequence starting from 0.
     
-### Output format
+## Output format
 
-In the python implementation, Seqstr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
+Using the python implementation as an example, Seqstr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
 
 ```
 ([('s1', 'TTGCACTCCAGCCTGGACAA'), ('s2', 'CCTGGGATGCTTGGCGTGGC')], '')
 ```
-Generally, we expect the Seqstr output to be a lists that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
+We expect the Seqstr output to be an ordered list that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
+
+
+## Python implementation usage
