@@ -1,6 +1,6 @@
 # Seqstr Documentation
 
-Seqstr (pronounced as seq-string) is a lightweight tool to compiles string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and allows specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
+Seqstr (pronounced as seq-string) is a lightweight tool to compile string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and allows specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
 
 Seqstr is also a format specification, which can be implemented in different languages. We will soon provide a test suite for verifying an implementation.
 
