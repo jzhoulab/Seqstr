@@ -4,34 +4,23 @@ import requests
 import sys
 import os
 import subprocess
-# PROJECT_DIR = os.environ['PROJECT_PATH']
-PROJECT_DIR = '/archive/bioinformatics/Zhou_lab/shared/cshi/proj_seqstr/'
-try:
-    download = str(sys.argv[1])
-    if os.path.exists(PROJECT_DIR+download+'.fa'):
-        pass
-    else:
-        url = 'https://hgdownload.soe.ucsc.edu/goldenPath/'+download+'/bigZips/'+download+'.fa.gz'
-        output_file = download+'.fa.gz'
-
-        # Download the file using wget
-        download_command = ['wget', url, '-O', output_file]
-        try:
-            subprocess.run(download_command, check=True)
-            print('Download completed successfully.')
-        except subprocess.CalledProcessError as e:
-            print('Error:', e)
-
-        # Extract the downloaded file using gunzip
-        extract_command = ['gunzip', output_file]
-        try:
-            subprocess.run(extract_command, check=True)
-            print('Extraction completed successfully.')
-        except subprocess.CalledProcessError as e:
-            print('Error:', e)
-except:
-    download = False
-
+def download(par):
+    url = 'https://hgdownload.soe.ucsc.edu/goldenPath/'+par+'/bigZips/'+par+'.fa.gz'
+    output_file = par+'.fa.gz'
+    # Download the file using wget
+    download_command = ['wget', url, '-O', output_file]
+    try:
+        subprocess.run(download_command, check=True)
+        print('Download completed successfully.')
+    except subprocess.CalledProcessError as e:
+        print('Error:', e)
+    # Extract the downloaded file using gunzip
+    extract_command = ['gunzip', output_file]
+    try:
+        subprocess.run(extract_command, check=True)
+        print('Extraction completed successfully.')
+    except subprocess.CalledProcessError as e:
+        print('Error:', e)
 
 def reverse_seq(seq):
     rev_seq = ''
@@ -42,22 +31,23 @@ def reverse_seq(seq):
         else:
             rev_seq += item
     return rev_seq[::-1]
-def toSeq(text):
-    text =  text.strip()
 
-    if ':' in text:#chr:start-end strand
+def extract_baseseq(text):
+    text =  text.strip()
+    #chr:start-end strand
+    if ':' in text:
         try:
             geno = text[re.search('\[', text).start()+1:re.search('\]', text).start()]    
+            sub = text[re.search('\]', text).start()+1:].split(':')
         except:
             geno = 'hg38'
-        sub = text[re.search('\]', text).start()+1:].split(':')
+            sub = text.lstrip().split(':')
         chr = sub[0]
         position = sub[1].split(' ')[0].replace(' ', '')
         start = int(position.split('-')[0])
         end = int(position.split('-')[1])
         strand = sub[1].split(' ')[1]
         #define genome input path using dict map
-
         if os.path.exists(PROJECT_DIR+geno+'.fa'):
             genome = selene_sdk.sequences.Genome(
                                 input_path=PROJECT_DIR+geno+'.fa'
@@ -71,7 +61,6 @@ def toSeq(text):
                 'start': start,
                 'end': end
             }
-
             try:
                 response = requests.get(url, params=params)
                 if response.status_code == 200:
@@ -79,16 +68,13 @@ def toSeq(text):
                 else:
                     print('Error:', response.status_code)
             except requests.RequestException as e:
-                print('Error:', e)    
-
-        
-        
+                print('Error:', e)     
         return seq,chr,start,strand
     else:
         return text.upper(),None,None,None
     
 
-def parser(text):
+def seqstr(text):
     #sec for arr, sub for string
     #each section ends with ;
     #, for continuation 
@@ -104,16 +90,20 @@ def parser(text):
             SeqName = "Sequence " + str(ix)
             sub0text = sub0
         output = ''
-        sub0text = re.sub(' +', ' ', sub0text)#remove extra spaces
+        #remove extra spaces
+        sub0text = re.sub(' +', ' ', sub0text)
         sec1 = sub0text.split(';')
         for sub1 in sec1:
-            sub1 = re.sub(' +', ' ', sub1)#remove extra spaces
+            #remove extra spaces
+            sub1 = re.sub(' +', ' ', sub1)
             if ',' in sub1:
                 sec2 = sub1.split(',')
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = toSeq(sec2[0])#base seq
+                #base seq
+                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = extract_baseseq(sec2[0])
                 variation = []
                 for sub2 in sec2:
-                    if '@' in sub2:#check overlap then chop by affected region                        
+                    #check overlap then chop by affected region
+                    if '@' in sub2:                        
                         sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
                         mutpos = int(sec3[1])-baseSeqStart
                         ref = sec3[2].upper()
@@ -143,14 +133,37 @@ def parser(text):
                             else:
                                 varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
                                 varied_seq += item[3]
-                    baseSeq = varied_seq#copy to baseSeq
+                    #override baseSeq
+                    baseSeq = varied_seq
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
             else:
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = toSeq(sub1)
+                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = extract_baseseq(sub1)
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
-            outputs.append((SeqName, output)) 
-    return outputs#tuple of name and actual seq
+        outputs.append((SeqName, output)) 
+    #tuple of name and actual seq
+    return outputs
+if __name__ == "__main__":
+    # python seqstr.py download hg38
+    # PROJECT_DIR = os.environ['PROJECT_PATH']
+    PROJECT_DIR = './'
+    try:
+        cmd = str(sys.argv[1])
+        par = str(sys.argv[2])
+        if cmd == 'download':
+            if os.path.exists(PROJECT_DIR+par+'.fa'):
+                print('genome file already exists')
+                if os.path.exists(PROJECT_DIR+par+'.fa.fai'):
+                    print('genome file index has already been built')
+                else:
+                    print('genome file index has not been built yet, it may take more time to extract sequence')
+            else:
+                download(par)
+        else:
+            par = False
+    except:
+        par = False
+    print(seqstr("<mouse>[rn7]chr7:5480600-5480620 +\n<human>[hg38]chr7:5480600-5480620 +"))
