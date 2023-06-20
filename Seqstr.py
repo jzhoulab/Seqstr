@@ -4,6 +4,21 @@ import requests
 import sys
 import os
 import subprocess
+
+
+def get_genome_dir():
+    config_file_path = '~/.seqstr.config'
+    if os.path.isfile(config_file_path):
+        with open(config_file_path, "r") as config_file:
+            for line in config_file:
+                if line.startswith("GENOME_DIR="):
+                    GENOME_DIR = line.split("=")[1].strip()
+                    break
+    else:
+        GENOME_DIR = "./"
+
+    return GENOME_DIR
+
 def download(par):
     url = 'https://hgdownload.soe.ucsc.edu/goldenPath/'+par+'/bigZips/'+par+'.fa.gz'
     output_file = par+'.fa.gz'
@@ -44,15 +59,28 @@ def extract_baseseq(text):
             sub = text.lstrip().split(':')
         chr = sub[0]
         position = sub[1].split(' ')[0].replace(' ', '')
-        start = int(position.split('-')[0])
-        end = int(position.split('-')[1])
-        strand = sub[1].split(' ')[1]
+        try:
+            start = int(position.split('-')[0])
+            end = int(position.split('-')[1])
+        except:
+            return None,None,None,None,"invalid coordinate input"
+        try:
+            strand = sub[1].split(' ')[1]
+            if strand not in ['+','-']:
+                return None,None,None,None,"invalid strand input"
+        except:
+            return None,None,None,None,"invalid strand input"
         #define genome input path using dict map
-        if os.path.exists(PROJECT_DIR+geno+'.fa'):
+        if os.path.exists(GENOME_DIR+geno+'.fa'):
             genome = selene_sdk.sequences.Genome(
-                                input_path=PROJECT_DIR+geno+'.fa'
+                                input_path=GENOME_DIR+geno+'.fa'
                             )
-            seq = genome.get_sequence_from_coords(chr, start, end, '+')
+            try:
+                seq = genome.get_sequence_from_coords(chr, start, end, '+')
+                if len(seq) < 1:
+                    return None,None,None,None,"cannot retrieve sequence"
+            except:
+                return None,None,None,None,"cannot retrieve sequence"
         else:
             url = 'https://api.genome.ucsc.edu/getData/sequence?'
             params = {
@@ -69,9 +97,9 @@ def extract_baseseq(text):
                     print('Error:', response.status_code)
             except requests.RequestException as e:
                 print('Error:', e)     
-        return seq,chr,start,strand
+        return seq,chr,start,strand,""
     else:
-        return text.upper(),None,None,None
+        return text.upper(),None,None,None,""
     
 
 def seqstr(text):
@@ -99,23 +127,30 @@ def seqstr(text):
             if ',' in sub1:
                 sec2 = sub1.split(',')
                 #base seq
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = extract_baseseq(sec2[0])
+                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = extract_baseseq(sec2[0])
+                if errormsg != "":
+                    return None,errormsg
                 variation = []
                 for sub2 in sec2:
                     #check overlap then chop by affected region
                     if '@' in sub2:                        
                         sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
-                        mutpos = int(sec3[1])-baseSeqStart
-                        ref = sec3[2].upper()
-                        alt = sec3[3].upper()
+                        try:
+                            mutpos = int(sec3[1])-baseSeqStart
+                        except:
+                            return None,"invalid variant coordinate"
+                        try:
+                            ref = sec3[2].upper()
+                            alt = sec3[3].upper()
+                        except:
+                            return None,"invalid reference/alternative allele"
                         variation.append((mutpos,mutpos+len(ref),ref,alt))    
                 if len(variation) > 0:
                     sorted_variation = sorted(variation, key=lambda x: x[0])
                     for ix,item in enumerate(sorted_variation):
                         if ix != 0:
                             if item[0] < sorted_variation[ix-1][1]:
-                                print("overlapping variation")
-                                return None
+                                return None,"overlapping variation"
                     varied_seq = ''
                     if len(sorted_variation) == 1:
                         varied_seq += baseSeq[:item[0]]
@@ -139,24 +174,32 @@ def seqstr(text):
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
             else:
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand = extract_baseseq(sub1)
+                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = extract_baseseq(sub1)
+                if errormsg != "":
+                    return None,errormsg
                 if baseSeqStrand == '-':
                     baseSeq = reverse_seq(baseSeq)
                 output += baseSeq
         outputs.append((SeqName, output)) 
     #tuple of name and actual seq
-    return outputs
+    return outputs,""
 if __name__ == "__main__":
-    # python seqstr.py download hg38
-    # PROJECT_DIR = os.environ['PROJECT_PATH']
-    PROJECT_DIR = './'
+    # python seqstr.py --download=hg38
+    # GENOME_DIR = os.environ['GENOME_DIR']
+    GENOME_DIR = get_genome_dir()
+    cmd = ''
     try:
-        cmd = str(sys.argv[1])
-        par = str(sys.argv[2])
+        for arg in sys.argv:
+            if arg.startswith("--download="):
+                par = arg.split("=")[1]
+                cmd = 'download'
+            elif arg.startswith("--dir="):
+                GENOME_DIR = arg.split("=")[1]
+
         if cmd == 'download':
-            if os.path.exists(PROJECT_DIR+par+'.fa'):
+            if os.path.exists(GENOME_DIR+par+'.fa'):
                 print('genome file already exists')
-                if os.path.exists(PROJECT_DIR+par+'.fa.fai'):
+                if os.path.exists(GENOME_DIR+par+'.fa.fai'):
                     print('genome file index has already been built')
                 else:
                     print('genome file index has not been built yet, it may take more time to extract sequence')
