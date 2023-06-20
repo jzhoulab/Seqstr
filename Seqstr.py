@@ -186,8 +186,12 @@ def seqstr(text):
 if __name__ == "__main__":
     # python seqstr.py --download=hg38
     # GENOME_DIR = os.environ['GENOME_DIR']
+    dir_bool = True
     GENOME_DIR = get_genome_dir()
+    if GENOME_DIR != './':
+        dir_bool = False
     cmd = ''
+    
     try:
         for arg in sys.argv:
             if arg.startswith("--download="):
@@ -195,8 +199,15 @@ if __name__ == "__main__":
                 cmd = 'download'
             elif arg.startswith("--dir="):
                 GENOME_DIR = arg.split("=")[1]
+                dir_bool = False
 
         if cmd == 'download':
+            if dir_bool:
+                GENOME_DIR = input("Please enter a directory for downloading genome files: ")
+                
+            if not os.path.exists(GENOME_DIR):
+                os.makedirs(GENOME_DIR)
+
             if os.path.exists(GENOME_DIR+par+'.fa'):
                 print('genome file already exists')
                 if os.path.exists(GENOME_DIR+par+'.fa.fai'):
@@ -209,4 +220,5 @@ if __name__ == "__main__":
             par = False
     except:
         par = False
+    
     print(seqstr("<mouse>[rn7]chr7:5480600-5480620 +\n<human>[hg38]chr7:5480600-5480620 +"))
