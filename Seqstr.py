@@ -1,4 +1,4 @@
-import selene_sdk
+import pyfaidx
 import re
 import requests
 import sys
@@ -72,11 +72,9 @@ def extract_baseseq(text):
             return None,None,None,None,"invalid strand input"
         #define genome input path using dict map
         if os.path.exists(GENOME_DIR+geno+'.fa'):
-            genome = selene_sdk.sequences.Genome(
-                                input_path=GENOME_DIR+geno+'.fa'
-                            )
+            genome = pyfaidx.Fasta(GENOME_DIR+geno+'.fa')
             try:
-                seq = genome.get_sequence_from_coords(chr, start, end, '+')
+                seq = str(genome[chr][ start: end]).upper()
                 if len(seq) < 1:
                     return None,None,None,None,"cannot retrieve sequence"
             except:
@@ -204,7 +202,7 @@ if __name__ == "__main__":
         if cmd == 'download':
             if dir_bool:
                 GENOME_DIR = input("Please enter a directory for downloading genome files: ")
-                
+
             if not os.path.exists(GENOME_DIR):
                 os.makedirs(GENOME_DIR)
 

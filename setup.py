@@ -28,6 +28,6 @@ setup(
     packages=['seqstr'],
     install_requires=[
         'requests',
-        'selene_sdk',
+        'pyfaidx',
     ],
 )
