@@ -46,10 +46,10 @@ would be parsed into an array of sequences, with `s1` and `s2` as their names.
     
 ## Output format
 
-Using the python implementation as an example, Seqstr outputs a tuple of `(list of (sequence name, sequence), error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
+Using the python implementation as an example, Seqstr outputs a list of SeqOutput objects `list of (sequence name, sequence, error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
 
 ```
-([('s1', 'TTGCACTCCAGCCTGGACAA'), ('s2', 'CCTGGGATGCTTGGCGTGGC')], '')
+[('s1', 'TTGCACTCCAGCCTGGACAA', ''), ('s2', 'CCTGGGATGCTTGGCGTGGC', '')]
 ```
 We expect the Seqstr output to be an ordered list that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
 
