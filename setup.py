@@ -24,7 +24,7 @@ with open(config_file_path, "w") as config_file:
 
 setup(
     name='seqstr',
-    version='1.0',
+    version='0.0.1',
     packages=['seqstr'],
     install_requires=[
         'requests',
