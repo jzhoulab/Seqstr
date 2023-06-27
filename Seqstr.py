@@ -4,7 +4,21 @@ import requests
 import sys
 import os
 import subprocess
+import argparse
 
+class baseSeq:
+    def __init__(self,Seq,Chr,Start,Strand,errormsg):
+        self.Seq = Seq
+        self.Chr = Chr
+        self.Start = Start
+        self.Strand = Strand
+        self.errormsg = errormsg
+
+class SeqOutput:
+    def __init__(self,Name,Seq,errormsg):
+        self.Name = Name
+        self.Seq = Seq
+        self.errormsg = errormsg
 
 def get_genome_dir():
     config_file_path = '~/.seqstr.config'
@@ -28,14 +42,14 @@ def download(par):
         subprocess.run(download_command, check=True)
         print('Download completed successfully.')
     except subprocess.CalledProcessError as e:
-        print('Error:', e)
+        print('Download failed')
     # Extract the downloaded file using gunzip
     extract_command = ['gunzip', output_file]
     try:
         subprocess.run(extract_command, check=True)
         print('Extraction completed successfully.')
     except subprocess.CalledProcessError as e:
-        print('Error:', e)
+        print('Extraction failed')
 
 def reverse_seq(seq):
     rev_seq = ''
@@ -63,22 +77,23 @@ def extract_baseseq(text):
             start = int(position.split('-')[0])
             end = int(position.split('-')[1])
         except:
-            return None,None,None,None,"invalid coordinate input"
+            return baseSeq(None,None,None,None,"invalid coordinate input")
         try:
             strand = sub[1].split(' ')[1]
             if strand not in ['+','-']:
-                return None,None,None,None,"invalid strand input"
+                return baseSeq(None,None,None,None,"invalid strand input")
         except:
-            return None,None,None,None,"invalid strand input"
+            return baseSeq(None,None,None,None,"invalid strand input")
         #define genome input path using dict map
+        GENOME_DIR = get_genome_dir()
         if os.path.exists(GENOME_DIR+geno+'.fa'):
             genome = pyfaidx.Fasta(GENOME_DIR+geno+'.fa')
             try:
                 seq = str(genome[chr][ start: end]).upper()
                 if len(seq) < 1:
-                    return None,None,None,None,"cannot retrieve sequence"
+                    return baseSeq(None,None,None,None,"cannot retrieve sequence from pyfaidx")
             except:
-                return None,None,None,None,"cannot retrieve sequence"
+                return baseSeq(None,None,None,None,"cannot retrieve sequence from pyfaidx")
         else:
             url = 'https://api.genome.ucsc.edu/getData/sequence?'
             params = {
@@ -92,12 +107,12 @@ def extract_baseseq(text):
                 if response.status_code == 200:
                     seq = response.json().get('dna')
                 else:
-                    print('Error:', response.status_code)
+                    return baseSeq(None,None,None,None,"cannot retrieve sequence from UCSC API")
             except requests.RequestException as e:
-                print('Error:', e)     
-        return seq,chr,start,strand,""
+                return baseSeq(None,None,None,None,"cannot retrieve sequence from UCSC API")
+        return baseSeq(seq,chr,start,strand,"")
     else:
-        return text.upper(),None,None,None,""
+        return baseSeq(text.upper(),None,None,None,"")
     
 
 def seqstr(text):
@@ -106,6 +121,73 @@ def seqstr(text):
     #, for continuation 
     #@chr mutpos ref alt
     #\n for multiple sequences 
+    def singleseqstr(SeqName,sub0text):
+            output = ''
+            #remove extra spaces
+            sub0text = re.sub(' +', ' ', sub0text)
+            sec1 = sub0text.split(';')
+            for sub1 in sec1:
+                #remove extra spaces
+                sub1 = re.sub(' +', ' ', sub1)
+                if ',' in sub1:
+                    sec2 = sub1.split(',')
+                    #base seq
+                    bSeq = extract_baseseq(sec2[0])
+                    baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = bSeq.Seq,bSeq.Chr,bSeq.Start,bSeq.Strand,bSeq.errormsg 
+                    if errormsg != "":
+                        return SeqOutput(SeqName, None, errormsg)
+                    variation = []
+                    for sub2 in sec2:
+                        #check overlap then chop by affected region
+                        if '@' in sub2:                        
+                            sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
+                            try:
+                                mutpos = int(sec3[1])-baseSeqStart
+                            except:
+                                return SeqOutput(SeqName, None, "invalid variant coordinate")
+                            try:
+                                ref = sec3[2].upper()
+                                alt = sec3[3].upper()
+                            except:
+                                return SeqOutput(SeqName,None,"invalid reference/alternative allele")
+                            variation.append((mutpos,mutpos+len(ref),ref,alt))    
+                    if len(variation) > 0:
+                        sorted_variation = sorted(variation, key=lambda x: x[0])
+                        for ix,item in enumerate(sorted_variation):
+                            if ix != 0:
+                                if item[0] < sorted_variation[ix-1][1]:
+                                    return SeqOutput(SeqName, None,"overlapping variation")
+                        varied_seq = ''
+                        if len(sorted_variation) == 1:
+                            varied_seq += baseSeq[:item[0]]
+                            varied_seq += item[3]
+                            varied_seq += baseSeq[item[1]:]
+                        else:  
+                            for ix,item in enumerate(sorted_variation):
+                                if ix == 0:
+                                    varied_seq += baseSeq[:item[0]]
+                                    varied_seq += item[3]
+                                elif ix == len(sorted_variation)-1:
+                                    varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                                    varied_seq += item[3]
+                                    varied_seq += baseSeq[item[1]:]
+                                else:
+                                    varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
+                                    varied_seq += item[3]
+                        #override baseSeq
+                        baseSeq = varied_seq
+                    if baseSeqStrand == '-':
+                        baseSeq = reverse_seq(baseSeq)
+                    output += baseSeq
+                else:
+                    bSeq = extract_baseseq(sub1)
+                    baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = bSeq.Seq,bSeq.Chr,bSeq.Start,bSeq.Strand,bSeq.errormsg 
+                    if errormsg != "":
+                        return SeqOutput(SeqName, None,errormsg)
+                    if baseSeqStrand == '-':
+                        baseSeq = reverse_seq(baseSeq)
+                    output += baseSeq
+            return SeqOutput(SeqName, output,"") 
     outputs = []
     sec0 = filter(bool, text.splitlines())
     for ix, sub0 in enumerate(sec0):
@@ -115,93 +197,31 @@ def seqstr(text):
         except:
             SeqName = "Sequence " + str(ix)
             sub0text = sub0
-        output = ''
-        #remove extra spaces
-        sub0text = re.sub(' +', ' ', sub0text)
-        sec1 = sub0text.split(';')
-        for sub1 in sec1:
-            #remove extra spaces
-            sub1 = re.sub(' +', ' ', sub1)
-            if ',' in sub1:
-                sec2 = sub1.split(',')
-                #base seq
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = extract_baseseq(sec2[0])
-                if errormsg != "":
-                    return None,errormsg
-                variation = []
-                for sub2 in sec2:
-                    #check overlap then chop by affected region
-                    if '@' in sub2:                        
-                        sec3 = sub2[re.search('@', sub2).start()+1:].split(' ')
-                        try:
-                            mutpos = int(sec3[1])-baseSeqStart
-                        except:
-                            return None,"invalid variant coordinate"
-                        try:
-                            ref = sec3[2].upper()
-                            alt = sec3[3].upper()
-                        except:
-                            return None,"invalid reference/alternative allele"
-                        variation.append((mutpos,mutpos+len(ref),ref,alt))    
-                if len(variation) > 0:
-                    sorted_variation = sorted(variation, key=lambda x: x[0])
-                    for ix,item in enumerate(sorted_variation):
-                        if ix != 0:
-                            if item[0] < sorted_variation[ix-1][1]:
-                                return None,"overlapping variation"
-                    varied_seq = ''
-                    if len(sorted_variation) == 1:
-                        varied_seq += baseSeq[:item[0]]
-                        varied_seq += item[3]
-                        varied_seq += baseSeq[item[1]:]
-                    else:  
-                        for ix,item in enumerate(sorted_variation):
-                            if ix == 0:
-                                varied_seq += baseSeq[:item[0]]
-                                varied_seq += item[3]
-                            elif ix == len(sorted_variation)-1:
-                                varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
-                                varied_seq += item[3]
-                                varied_seq += baseSeq[item[1]:]
-                            else:
-                                varied_seq += baseSeq[sorted_variation[ix-1][1]:item[0]]
-                                varied_seq += item[3]
-                    #override baseSeq
-                    baseSeq = varied_seq
-                if baseSeqStrand == '-':
-                    baseSeq = reverse_seq(baseSeq)
-                output += baseSeq
-            else:
-                baseSeq,baseSeqChr,baseSeqStart,baseSeqStrand,errormsg = extract_baseseq(sub1)
-                if errormsg != "":
-                    return None,errormsg
-                if baseSeqStrand == '-':
-                    baseSeq = reverse_seq(baseSeq)
-                output += baseSeq
-        outputs.append((SeqName, output)) 
+        outputs.append(singleseqstr(SeqName,sub0text))
     #tuple of name and actual seq
-    return outputs,""
+    return outputs
 if __name__ == "__main__":
-    # python seqstr.py --download=hg38
-    # GENOME_DIR = os.environ['GENOME_DIR']
     dir_bool = True
+    config_file_path = '~/.seqstr.config'
     GENOME_DIR = get_genome_dir()
     if GENOME_DIR != './':
         dir_bool = False
     cmd = ''
-    
+    parser = argparse.ArgumentParser(description='Seqstr')
+    parser.add_argument('--download', help='Specify the genome files to download')
+    parser.add_argument('--dir', help='Specify the directory for downloading genome files')
+    parser.add_argument('--input', help='Specify the input file')
+    args = parser.parse_args()
     try:
-        for arg in sys.argv:
-            if arg.startswith("--download="):
-                par = arg.split("=")[1]
-                cmd = 'download'
-            elif arg.startswith("--dir="):
-                GENOME_DIR = arg.split("=")[1]
-                dir_bool = False
-
+        if args.download:
+            par = args.download
+            cmd = 'download'
+        if args.dir:
+            GENOME_DIR = args.dir
+            dir_bool = False
         if cmd == 'download':
             if dir_bool:
-                GENOME_DIR = input("Please enter a directory for downloading genome files: ")
+                GENOME_DIR = input("Please enter the directory for downloading genome files: ")
 
             if not os.path.exists(GENOME_DIR):
                 os.makedirs(GENOME_DIR)
@@ -216,7 +236,40 @@ if __name__ == "__main__":
                 download(par)
         else:
             par = False
+
+        new_line = "GENOME_DIR="+GENOME_DIR
+
+        if os.path.isfile(config_file_path):
+            with open(config_file_path, "r") as file:
+                lines = file.readlines()
+
+            modified = False
+            for i, line in enumerate(lines):
+                if line.startswith('GENOME_DIR='):
+                    lines[i] = new_line + "\n"
+                    modified = True
+                    break
+
+            if modified:
+                pass
+            else:
+                lines.append(new_line + "\n")
+            with open(config_file_path, "w") as file:
+                file.writelines(lines)
+        else:
+            with open(config_file_path, "w") as file:
+                file.write(new_line)
+
+        if args.input:
+            with open(args.input, 'r') as file:
+                contents = file.read()
+                seqstrout = seqstr(contents)
+                for item in seqstrout:
+                    if item.errormsg == '':
+                        print(item.Seq)
+                    else:
+                        print(item.errormsg)
     except:
         par = False
-    
-    print(seqstr("<mouse>[rn7]chr7:5480600-5480620 +\n<human>[hg38]chr7:5480600-5480620 +"))
+        parser.print_help()
+        
