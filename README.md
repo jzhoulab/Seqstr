@@ -55,3 +55,38 @@ We expect the Seqstr output to be an ordered list that can be access with an ind
 
 
 ## Python implementation usage
+
+### Installation 
+
+```
+pip install seqstr
+```
+
+Or 
+
+```
+conda install -c bioconda seqstr
+```
+
+### CLI Usage
+
+```
+python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
+```
+
+-  -h, --help           show this help message and exit
+-  --download DOWNLOAD  Specify the genome files to download
+-  --dir DIR            Specify the directory for downloading genome files
+-  --output OUTPUT      Specify the output fasta file path and name
+-  input_file           Specify the input file
+
+### Test 
+
+- `output.fasta` is generated after running the following command in terminal
+```
+python seqstr.py test.txt
+```
+- `test passes` or specific error messages are printed to stdout after running test script, `test.py`
+```
+python test.py
+``` 
