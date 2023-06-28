@@ -23,16 +23,26 @@ class SeqOutput:
         self.errormsg = errormsg
 
 
+def to_fasta(SeqOutput, filepath):
+    with open(filepath, "w") as file:
+        for item in SeqOutput:
+            if item.errormsg == "":
+                file.write(f">{item.Name}\n")
+                file.write(f"{item.Seq}\n")
+            else:
+                print(item.Name, " Error:", item.errormsg)
+
+
 def get_genome_dir():
-    config_file_path = "~/.seqstr.config"
-    if os.path.isfile(config_file_path):
+    config_file_path = os.path.expanduser("~/.seqstr.config")
+    if os.path.exists(config_file_path):
         with open(config_file_path, "r") as config_file:
             for line in config_file:
                 if line.startswith("GENOME_DIR="):
                     GENOME_DIR = line.split("=")[1].strip()
                     break
     else:
-        GENOME_DIR = "./"
+        GENOME_DIR = os.getcwd()
 
     return GENOME_DIR
 
@@ -129,7 +139,7 @@ def extract_baseseq(text):
             try:
                 response = requests.get(url, params=params)
                 if response.status_code == 200:
-                    seq = response.json().get("dna")
+                    seq = response.json().get("dna").upper()
                 else:
                     return baseSeq(
                         None, None, None, None, "cannot retrieve sequence from UCSC API"
@@ -254,35 +264,30 @@ def seqstr(text):
 
 
 if __name__ == "__main__":
-    dir_bool = True
-    config_file_path = "~/.seqstr.config"
+    config_file_path = os.path.expanduser("~/.seqstr.config")
     GENOME_DIR = get_genome_dir()
-    if GENOME_DIR != "./":
-        dir_bool = False
-    cmd = ""
-    parser = argparse.ArgumentParser(description="Seqstr")
+    parser = argparse.ArgumentParser(description="seqstr")
+    parser.add_argument("input_file", help="Specify the input file")
     parser.add_argument("--download", help="Specify the genome files to download")
     parser.add_argument(
         "--dir", help="Specify the directory for downloading genome files"
     )
-    parser.add_argument("--input", help="Specify the input file")
+    parser.add_argument("--output", help="Specify the output fasta file path and name")
     args = parser.parse_args()
     try:
-        if args.download:
-            par = args.download
-            cmd = "download"
         if args.dir:
             GENOME_DIR = args.dir
-            dir_bool = False
-        if cmd == "download":
-            if dir_bool:
-                GENOME_DIR = input(
-                    "Please enter the directory for downloading genome files: "
-                )
 
-            if not os.path.exists(GENOME_DIR):
-                os.makedirs(GENOME_DIR)
+        if args.download and not args.dir:
+            GENOME_DIR = input(
+                "Please enter the directory for downloading genome files: "
+            )
 
+        if not os.path.exists(GENOME_DIR):
+            os.makedirs(GENOME_DIR)
+
+        if args.download:
+            par = args.download
             if os.path.exists(GENOME_DIR + par + ".fa"):
                 print("genome file already exists")
                 if os.path.exists(GENOME_DIR + par + ".fa.fai"):
@@ -298,7 +303,7 @@ if __name__ == "__main__":
 
         new_line = "GENOME_DIR=" + GENOME_DIR
 
-        if os.path.isfile(config_file_path):
+        if os.path.exists(config_file_path):
             with open(config_file_path, "r") as file:
                 lines = file.readlines()
 
@@ -308,7 +313,6 @@ if __name__ == "__main__":
                     lines[i] = new_line + "\n"
                     modified = True
                     break
-
             if modified:
                 pass
             else:
@@ -318,16 +322,14 @@ if __name__ == "__main__":
         else:
             with open(config_file_path, "w") as file:
                 file.write(new_line)
-
-        if args.input:
-            with open(args.input, "r") as file:
+        if args.input_file:
+            with open(args.input_file, "r") as file:
                 contents = file.read()
                 seqstrout = seqstr(contents)
-                for item in seqstrout:
-                    if item.errormsg == "":
-                        print(item.Seq)
-                    else:
-                        print(item.errormsg)
+                if args.output:
+                    to_fasta(seqstrout, args.output)
+                else:
+                    to_fasta(seqstrout, "output.fasta")
     except:
         par = False
         parser.print_help()
