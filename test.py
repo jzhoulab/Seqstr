@@ -42,12 +42,13 @@ ans = ['TTGTCCAGGCTGGAGTGCAA',#base
       'TGTCCAGGCTATAATTGCACTCCA',#indel,concat,indel rev
       'TGTCCAGGCTATATGGAGTGCAAT'#spacing
       ]
-
-for i,item in enumerate(test):
-    if seqstr(item)[0].errormsg != '':
-        print(seqstr(item)[0].errormsg)
+text = '\n'.join(test)
+seqstrout = seqstr(text)
+for i,item in enumerate(seqstrout):
+    if item.errormsg != '':
+        print(item.Name," Error:",item.errormsg)
     else:
-        if seqstr(item)[0].Seq != ans[i]:
-            print('test result:',seqstr(item)[0].Seq,'correct ans:',ans[i])
+        if item.Seq != ans[i]:
+            print(item.Name,' test result:',item.Seq,',correct ans:',ans[i])
         else:
-            print('test passes')
+            print(item.Name,' test passes')
