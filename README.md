@@ -1,6 +1,6 @@
 # Seqstr Documentation
 
-Seqstr (pronounced as seq-string) is a lightweight tool to compile string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and allows specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
+Seqstr (pronounced as seq-string) is a lightweight tool to compile string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
 
 Seqstr is also a format specification, which can be implemented in different languages. We will soon provide a test suite for verifying an implementation.
 
@@ -20,12 +20,12 @@ For more flexibly specifying a sequence that is different from the reference gen
 
 #### Compose subsequences
 
-Seqstr can concatenate multiple subsequences connected by `;`. Each subsequence can be either a genomic interval (For example, `[hg38]chr7:5530575-5530625 -`) or a sequence (For example, `TTAAccggGGNaa`). For directly specifying sequence in Seqstr, any characters are allowed and will be included in the output sequence. Because the purpose of Seqstr is to shorten the input size, direct sequence specification is usually used when concatenating with an genomic interval.
+Seqstr can concatenate multiple subsequences connected by `;`. Each subsequence can be either a genomic interval (For example, `[hg38]chr7:5530575-5530625 -`) or a sequence (For example, `TTAAccggGGNaa`). For directly specifying sequence in Seqstr, any characters, e.g. special marking, are allowed and will be included in the output sequence. Because the purpose of Seqstr is to shorten the input size, direct sequence specification is usually used when concatenating with an genomic interval.
 - `;` is used to separate multiple sections of sequences. The final outcome consists of all sections and follows the order of input string
 - raw sequence strings are also allowed and remain as they were in the entire output sequence
 
 #### Sequence modifier
-Any genomic interval can be modified by a mutation or variant specified with the syntax `@chr position reference_allele alternative_allele`. Multiple modifier can be provided to introduce multiple mutations into the same sequence. 
+Any genomic interval can be modified by a mutation or variant specified with the syntax `@chr position reference_allele alternative_allele`. Multiple modifier can be provided to introduce multiple mutations into the same sequence. Mutation specification is with respect to **original sequence coordinates and `+` strand**.
 
 - mutation specification is separated from the genomic interval specification by `,` 
 - mutation specification starts with `@`chromosome, then at particular coordinate, change from reference_allele to alternative_allele
@@ -49,10 +49,26 @@ would be parsed into an array of sequences, with `s1` and `s2` as their names.
 Using the python implementation as an example, Seqstr outputs a list of SeqOutput objects `list of (sequence name, sequence, error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
 
 ```
-[('s1', 'TTGCACTCCAGCCTGGACAA', ''), ('s2', 'CCTGGGATGCTTGGCGTGGC', '')]
+SeqOutputList = [SeqOutput(Name='s1', Seq='TTGCACTCCAGCCTGGACAA', errormsg=''), SeqOutput(Name='s2', Seq='CCTGGGATGCTTGGCGTGGC', errormsg='')]
 ```
+You can access sequence name, sequence, error message as follows,
+
+```
+SeqOutputList[0].Name, SeqOutputList[0].Seq, SeqOutputList[0].errormsg
+```
+
 We expect the Seqstr output to be an ordered list that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
 
+## Symbols
+
+- ``
+- ``
+- ``
+- ``
+- ``
+- ``
+- ``
+- ``
 
 ## Python implementation usage
 
@@ -86,7 +102,7 @@ python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_
 ```
 python seqstr.py test.txt
 ```
-- `test passes` or specific error messages are printed to stdout after running test script, `test.py`
+- `test passes` with or without specific error messages are printed to stdout after running test script, `test.py`
 ```
 python test.py
 ``` 
