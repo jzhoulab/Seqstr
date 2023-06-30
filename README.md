@@ -25,7 +25,7 @@ Seqstr can concatenate multiple subsequences connected by `;`. Each subsequence 
 - raw sequence strings are also allowed and remain as they were in the entire output sequence
 
 #### Sequence modifier
-Any genomic interval can be modified by a mutation or variant specified with the syntax `@chr position reference_allele alternative_allele`. Multiple modifier can be provided to introduce multiple mutations into the same sequence. Mutation specification is with respect to **original sequence coordinates and `+` strand**.
+Any genomic interval can be modified by a mutation or variant specified with the syntax `@chr position reference_allele alternative_allele`. Multiple modifier can be provided to introduce multiple mutations into the same sequence. Mutation specification is with respect to *original sequence coordinates and `+` strand*.
 
 - mutation specification is separated from the genomic interval specification by `,` 
 - mutation specification starts with `@`chromosome, then at particular coordinate, change from reference_allele to alternative_allele
