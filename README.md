@@ -9,7 +9,7 @@ Seqstr is also a format specification, which can be implemented in different lan
 
 Use `[reference_genome]chr:start-end strand` to specify an genomic interval. For example, `[hg38]chr7:5530575-5530625 -` would extract cooridnate 5530575 through 5530625 from chromosome 7 of the hg38 reference genome, and take reverse complement of the sequence. 
 
-- `[]` is used to specifcy the reference genome (UCSC convention), if not specified, the default is hg38.
+- `[]` is used to specify the reference genome (UCSC convention), if not specified, the default is hg38.
 - chromosome name should be one of the chromosome names from the specified reference genome (UCSC convention), followed by `:`
 - start and end coordinates are 0-based, connected via `-`, inclusive for the start coordinate and exclusive for the end coordinate
 - strand only takes `+` and `-`, default is `+`. strand is separated from end coordinate by a space
@@ -61,14 +61,18 @@ We expect the Seqstr output to be an ordered list that can be access with an ind
 
 ## Symbols
 
-- ``
-- ``
-- ``
-- ``
-- ``
-- ``
-- ``
-- ``
+- Sequence : complete individual sequence for downstream analysis, consists of consecutive nucleotides 
+- Subsequences : atoms, components of the entire sequence
+- Sequence modifier : introduce mutation to original sequence
+- `[]` : specifcy the reference genome (UCSC convention)
+- `:` : separate chromosome and coordinate
+- `-` : means "from...to..." between two valid coordinates, or "reverse strand" in strand specification
+- `+` : "forward strand" in strand specification
+- `;` : separate multiple sections of sequences
+- `@` : initiate mutation specification
+- `,` : separate mutation specification
+- `\n` : separate multiple sequences
+- `<>` : enclose the name for sequence
 
 ## Python implementation usage
 
@@ -85,6 +89,8 @@ conda install -c bioconda seqstr
 ```
 
 ### CLI Usage
+
+For command line usage, by passing the optional argument, `input_file`, to `seqstr.py`, sequences are retrieved and saved in fasta format. `--download` option specifies the genome files to download so that sequences will be retrieved locally in future use. If you only want to download human genome files without retrieval of any sequences, you may run for example, `python seqstr.py --download hg38` without providing `input_file`. If local genome files are not found, `seqstr.py` will query UCSC API instead. `--dir` sets the directory for downloading genome files and the default directory is your working directory. During installation, you may also set the directory, which is stored in `~/.seqstr.config` and will be overwritten everytime `--dir` is specified. `--output` option is for the output fasta file path and name. The default is saving to output.fasta in current working directory.
 
 ```
 python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
