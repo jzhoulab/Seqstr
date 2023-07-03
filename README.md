@@ -59,7 +59,7 @@ SeqOutputList[0].Name, SeqOutputList[0].Seq, SeqOutputList[0].errormsg
 
 We expect the Seqstr output to be an ordered list that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
 
-## Symbols
+## Symbols and terms
 
 - Sequence : complete individual sequence for downstream analysis, consists of consecutive nucleotides 
 - Subsequences : atoms, components of the entire sequence
