@@ -2,7 +2,7 @@
 
 Seqstr (pronounced as seq-string) is a lightweight tool to compile string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
 
-Seqstr is also a format specification, which can be implemented in different languages. We will soon provide a test suite for verifying an implementation.
+Seqstr is also a format specification, which can be implemented in different languages. We also provide a test suite for verifying an implementation.
 
 ## Seqstr format
 ### Genomic interval
@@ -90,7 +90,7 @@ conda install -c bioconda seqstr
 
 ### CLI Usage
 
-For command line usage, by passing the optional argument, `input_file`, to `seqstr.py`, sequences are retrieved and saved in fasta format. `--download` option specifies the genome files to download so that sequences will be retrieved locally in future use. If you only want to download human genome files without retrieval of any sequences, you may run for example, `python seqstr.py --download hg38` without providing `input_file`. If local genome files are not found, `seqstr.py` will query UCSC API instead. `--dir` sets the directory for downloading genome files and the default directory is your working directory. During installation, you may also set the directory, which is stored in `~/.seqstr.config` and will be overwritten everytime `--dir` is specified. `--output` option is for the output fasta file path and name. The default is saving to output.fasta in current working directory.
+For command line usage, simply provides the Seqstr input file path, `input_file`, to `seqstr.py`, sequences are retrieved and saved in fasta format. `--download` option specifies the genome files to download so that sequences will be retrieved locally in future use. If you only want to download human genome files without retrieval of any sequences, you may run for example, `python seqstr.py --download hg38` without providing `input_file`. If local genome files are not found, `seqstr.py` will query UCSC API instead. `--dir` sets the directory for downloading genome files and the default directory is your working directory. During installation, you may also set the directory which will be stored in `~/.seqstr.config`, and it will be overwritten every time `--dir` is specified. `--output` option is for the output fasta file path and name. The default is saving to output.fasta in the current working directory.
 
 ```
 python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
