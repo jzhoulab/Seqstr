@@ -90,7 +90,7 @@ conda install -c bioconda seqstr
 
 ### CLI Usage
 
-For command line usage, simply provides the Seqstr input file path, `input_file`, to `seqstr.py`, sequences are retrieved and saved in fasta format. `--download` option specifies the genome files to download so that sequences will be retrieved locally in future use. If you only want to download human genome files without retrieval of any sequences, you may run for example, `python seqstr.py --download hg38` without providing `input_file`. If local genome files are not found, `seqstr.py` will query UCSC API instead. `--dir` sets the directory for downloading genome files and the default directory is your working directory. During installation, you may also set the directory which will be stored in `~/.seqstr.config`, and it will be overwritten every time `--dir` is specified. `--output` option is for the output fasta file path and name. The default is saving to output.fasta in the current working directory.
+For command line usage, simply provides the Seqstr input file path, `input_file`, to `seqstr.py`, sequences are retrieved and saved in fasta format. `--download` option specifies the genome files to download so that sequences will be retrieved locally in future use. If you only want to download human genome files without retrieval of any sequences, you may run for example, `python seqstr.py --download hg38` without providing `input_file`. If local genome files are not found, `seqstr.py` will query UCSC API instead. `--dir` sets the directory for downloading genome files and the default directory is your working directory. During installation, you may also set the directory which will be stored in `~/.seqstr.config`, and it will be overwritten every time `--dir` is specified. `--output` option is for the output fasta file path and name. The default is saving to `input_file`.fasta in the current working directory.
 
 ```
 python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
@@ -104,7 +104,7 @@ python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_
 
 ### Test 
 
-- `output.fasta` is generated after running the following command in terminal
+- `test.txt.fasta` is generated after running the following command in terminal
 ```
 python seqstr.py test.txt
 ```
