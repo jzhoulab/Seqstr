@@ -256,7 +256,7 @@ def seqstr(text):
             ]
             sub0text = sub0[re.search(">", sub0).start() + 1 :]
         except:
-            SeqName = "Sequence " + str(ix)
+            SeqName = "Sequence_" + str(ix)
             sub0text = sub0
         outputs.append(singleseqstr(SeqName, sub0text))
     # tuple of name and actual seq
@@ -329,7 +329,7 @@ if __name__ == "__main__":
                 if args.output:
                     to_fasta(seqstrout, args.output)
                 else:
-                    to_fasta(seqstrout, "output.fasta")
+                    to_fasta(seqstrout, args.input_file+".fasta")
     except:
         par = False
         parser.print_help()

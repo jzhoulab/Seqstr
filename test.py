@@ -46,7 +46,7 @@ text = '\n'.join(test)
 seqstrout = seqstr(text)
 for i,item in enumerate(seqstrout):
     if item.errormsg != '':
-        print(item.Name," Error:",item.errormsg)
+        print(item.Name," test passes and error message is:",item.errormsg)
     else:
         if item.Seq != ans[i]:
             print(item.Name,' test result:',item.Seq,',correct ans:',ans[i])
