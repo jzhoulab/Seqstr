@@ -1,5 +1,11 @@
 # Seqstr Documentation
+## Contents
 
+- [Seqstr format](#Seqstr-format)
+- [Output format](#Output-format)
+- [Symbols and terms](#Symbols-and-terms)
+- [Python implementation usage](#Python-implementation-usage)
+  
 Seqstr (pronounced as seq-string) is a lightweight tool to compile string input into genomic sequences. It is designed to provide a simple and flexible way to specify long genomic sequence that can be used for downstream analysis. Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides and specifying mutations. It is flexible in parsing many sections of string inputs together into a single coherent output sequence. Seqstr can also render multiple sequences outputs for downstream comparisons.  
 
 Seqstr is also a format specification, which can be implemented in different languages. We also provide a test suite for verifying an implementation.
