@@ -112,6 +112,16 @@ python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_
 -  --output OUTPUT      Specify the output fasta file path and name
 -  input_file           Specify the input file
 
+### API Usage
+
+```
+from seqstr import seqstr
+SeqString = "<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +"
+SeqOutputList = seqstr(SeqString)
+for item in SeqOutputList:
+ name, seq, errormsg = item.Name, item.Seq, item.errormsg
+```
+
 ### Test 
 
 - `test.txt.fasta` is generated after running the following command in terminal
