@@ -52,7 +52,9 @@ would be parsed into an array of sequences, with `s1` and `s2` as their names.
     
 ## Output format
 
-Using the python implementation as an example, Seqstr outputs a list of SeqOutput objects `list of (sequence name, sequence, error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
+The python CLI outputs sequences in fasta format.
+
+The python API outputs a list of SeqOutput objects `list of (sequence name, sequence, error message)`. For example, `<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +` returns
 
 ```
 SeqOutputList = [SeqOutput(Name='s1', Seq='TTGCACTCCAGCCTGGACAA', errormsg=''), SeqOutput(Name='s2', Seq='CCTGGGATGCTTGGCGTGGC', errormsg='')]
@@ -63,18 +65,18 @@ You can access sequence name, sequence, error message as follows,
 SeqOutputList[0].Name, SeqOutputList[0].Seq, SeqOutputList[0].errormsg
 ```
 
-We expect the Seqstr output to be an ordered list that can be access with an index and each element contains a name and the a sequence which can also be accessed by an index.
+We expect the Seqstr output to be an ordered list that can be accessed with an index. Each element contains a name and a sequence.
 
 ## Symbols and terms
 
-- Sequence : complete individual sequence for downstream analysis, consists of consecutive nucleotides 
-- Subsequences : atoms, components of the entire sequence
-- Sequence modifier : introduce mutation to original sequence
-- `[]` : specifcy the reference genome (UCSC convention)
+- Sequence : complete individual sequence for downstream analysis, consisting of consecutive nucleotides 
+- Subsequences : a segment of a sequence; the minimal unit of Seqstr
+- Sequence modifier : introduce mutation to the sequence specified by a genomic region
+- `[]` : specify the reference genome (UCSC convention)
 - `:` : separate chromosome and coordinate
-- `-` : means "from...to..." between two valid coordinates, or "reverse strand" in strand specification
+- `-` : means "from...to..." between two valid coordinates (0-based), or "reverse strand" in strand specification
 - `+` : "forward strand" in strand specification
-- `;` : separate multiple sections of sequences
+- `;` : separate multiple subsequences
 - `@` : initiate mutation specification
 - `,` : separate mutation specification
 - `\n` : separate multiple sequences
