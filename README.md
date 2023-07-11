@@ -2,7 +2,7 @@
 
 Seqstr (pronounced as seq-string) is a lightweight tool to compile simple string input into long genomic sequences. It is designed to provide a concise and flexible way to specify long genomic sequences that can be used for downstream analysis. For example, it can be by web servers to avoid transferring long genomic sequences. Seqstr is also a format specification, which can be implemented in different languages. We also provide a test suite for verifying an implementation.
 
-Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides, and specifying mutations. A single sequence can be flexibly composed by concatenating multiple subsequences. Seqstr can also represent multiple named sequences for downstream applications.  
+Seqstr allows using a combination of genome interval coordinates, raw sequence nucleotides, and specifying mutations. A single sequence can be flexibly composed by concatenating multiple subsequences (for example, `[hg38]chr7:5530575-5530625 -, @chr7 5530575 C T, @chr7 5530576 GC A;TTAAccggGGNaa;[hg38]chrX:1000000-1000017 +;TTAA;`). Seqstr can also be used to express multiple named sequences for downstream applications.  
 
 
 ## Contents
