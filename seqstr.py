@@ -28,7 +28,9 @@ def to_fasta(SeqOutput, filepath):
         for item in SeqOutput:
             if item.errormsg == "":
                 file.write(f">{item.Name}\n")
-                file.write(f"{item.Seq}\n")
+                seq = item.Seq
+                seq_br = '\n'.join([seq[i:i+80] for i in range(0, len(seq), 80)])
+                file.write(f"{seq_br}\n")
             else:
                 print(item.Name, " Error:", item.errormsg)
 
