@@ -115,9 +115,9 @@ python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_
 ### API Usage
 
 ```
-from seqstr import Seqstr
+from seqstr import seqstr
 SeqString = "<s1>[hg38]chr7:5480600-5480620 -\n<s2>[hg38]chr7:44746680-44746700 +"
-SeqOutputList = Seqstr(SeqString)
+SeqOutputList = seqstr(SeqString)
 for item in SeqOutputList:
  name, seq, errormsg = item.Name, item.Seq, item.errormsg
 ```
