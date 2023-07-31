@@ -269,13 +269,14 @@ if __name__ == "__main__":
     config_file_path = os.path.expanduser("~/.seqstr.config")
     GENOME_DIR = get_genome_dir()
     parser = argparse.ArgumentParser(description="seqstr")
-    parser.add_argument("input_file", help="Specify the input file")
+    parser.add_argument("input_file", nargs="?", help="Specify the input file")
     parser.add_argument("--download", help="Specify the genome files to download")
     parser.add_argument(
         "--dir", help="Specify the directory for downloading genome files"
     )
     parser.add_argument("--output", help="Specify the output fasta file path and name")
     args = parser.parse_args()
+
     try:
         if args.dir:
             GENOME_DIR = args.dir
@@ -324,7 +325,12 @@ if __name__ == "__main__":
         else:
             with open(config_file_path, "w") as file:
                 file.write(new_line)
-        if args.input_file:
+    except:
+        par = False
+        parser.print_help()
+    
+    if args.input_file:
+        try:
             with open(args.input_file, "r") as file:
                 contents = file.read()
                 seqstrout = seqstr(contents)
@@ -332,6 +338,5 @@ if __name__ == "__main__":
                     to_fasta(seqstrout, args.output)
                 else:
                     to_fasta(seqstrout, args.input_file+".fasta")
-    except:
-        par = False
-        parser.print_help()
+        except FileNotFoundError:
+            print("Input file not found.")

@@ -12,7 +12,7 @@ for arg in sys.argv:
 if GENOME_DIR is None:
     GENOME_DIR = "./"
 
-config_file_path = "~/.seqstr.config"
+config_file_path = os.path.expanduser("~/.seqstr.config")
 config_exists = os.path.isfile(config_file_path)
 
 if not config_exists:
@@ -24,7 +24,7 @@ with open(config_file_path, "w") as config_file:
 
 setup(
     name='seqstr',
-    version='0.0.1',
+    version='0.0.5',
     packages=['seqstr'],
     install_requires=[
         'requests',
