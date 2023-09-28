@@ -105,6 +105,10 @@ For command line usage, simply provides the Seqstr input file path, `input_file`
 ```
 python seqstr.py [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
 ```
+Or
+```
+seqstr [-h] [--download DOWNLOAD] [--dir DIR] [--output OUTPUT] input_file
+```
 
 -  -h, --help           show this help message and exit
 -  --download DOWNLOAD  Specify the genome files to download
