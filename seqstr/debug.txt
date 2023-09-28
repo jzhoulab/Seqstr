@@ -1,0 +1,2 @@
+<wildtype>chr7:5480600-5580600 -
+<mutant>chr7:5480600-5580600 -, @chr7 5530626 TATA GCGC
