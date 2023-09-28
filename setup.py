@@ -26,7 +26,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name='seqstr',
-    version='0.0.8',
+    version='0.0.9',
     packages=['seqstr'],
     install_requires=[
         'requests',
@@ -34,7 +34,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'CLI_seqstr = seqstr.seqstr:main',
+            'seqstr = seqstr.seqstr:main',
         ]
     },
     author="Chenlai Shi",              
