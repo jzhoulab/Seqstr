@@ -26,7 +26,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name='seqstr',
-    version='0.0.9',
+    version='0.1.0',
     packages=['seqstr'],
     install_requires=[
         'requests',
