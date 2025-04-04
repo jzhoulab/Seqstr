@@ -10,7 +10,7 @@ Seqstr allows using a combination of genome interval coordinates, raw sequence n
 - [Seqstr format](#Seqstr-format)
 - [Output format](#Output-format)
 - [Symbols and terms](#Symbols-and-terms)
-- [Python implementation usage](#Python-implementation-usage)
+- [Python implementation Installation & Usage](#Python-implementation-usage)
 
 ## Seqstr format
 ### Genomic interval
@@ -86,17 +86,6 @@ We expect the Seqstr output to be an ordered list that can be accessed with an i
 
 ## Python implementation usage
 
-### Installation 
-
-```
-pip install seqstr
-```
-
-Or 
-
-```
-conda install -c bioconda seqstr
-```
 
 ### CLI Usage
 
